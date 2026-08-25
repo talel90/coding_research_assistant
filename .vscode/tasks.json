@@ -1,20 +1,20 @@
 {
-  "version": "2.0.0",
-  "tasks": [
-    {
-      "label": "Auto-commit loop",
-      "type": "shell",
-      "command": "bash autocommit.sh",
-      "isBackground": true,
-      "presentation": {
-        "reveal": "silent",
-        "panel": "dedicated",
-        "close": false
-      },
-      "problemMatcher": [],
-      "runOptions": {
-        "runOn": "folderOpen"
-      }
-    }
-  ]
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Auto-commit loop",
+            "type": "shell",
+            "command": "bash \"${workspaceFolder}/autocommit.sh\"",
+            "isBackground": true,
+            "presentation": {
+                "reveal": "silent",
+                "panel": "dedicated",
+                "close": false
+            },
+            "problemMatcher": [],
+            "runOptions": {
+                "runOn": "folderOpen"
+            }
+        }
+    ]
 }
