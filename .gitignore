@@ -43,3 +43,5 @@ data/processed/
 # Generated files
 outputs/
 tmp/
+*.sh
+cmdneeded.md
