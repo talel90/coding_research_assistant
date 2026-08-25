@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Environment variables / secrets
+.env
+.env.*
+!.env.example
+
+# VS Code
+.vscode/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Build
+build/
+dist/
+*.egg-info/
+
+# Local data
+data/raw/
+data/processed/
+
+# Vector databases / local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Generated files
+outputs/
+tmp/
