@@ -1,18 +1,32 @@
 from typing import Dict, Any
 from langgraph.graph import StateGraph, END
-from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage
 from .models import ResearchState, CompanyInfo, CompanyAnalysis
 from .firecrawl import FirecrawlService
 from .prompts import DeveloperToolsPrompts
-
+import os
 
 class Workflow:
     def __init__(self):
         self.firecrawl = FirecrawlService()
-        self.llm = ChatGoogleGenerativeAI(model="gemini-3.6-flash", temperature=0.1)
+        self.llm = ChatGoogleGenerativeAI(model="gemini-3.5-flash", temperature=0.1)
         self.prompts = DeveloperToolsPrompts()
         self.workflow = self._build_workflow()
+
+    @staticmethod
+    def _response_text(content: Any) -> str:
+        if isinstance(content, str):
+            return content
+        if isinstance(content, list):
+            text_parts = []
+            for block in content:
+                if isinstance(block, str):
+                    text_parts.append(block)
+                elif isinstance(block, dict) and block.get("type") == "text":
+                    text_parts.append(block.get("text", ""))
+            return "".join(text_parts)
+        return str(content)
 
     def _build_workflow(self):
         graph = StateGraph(ResearchState)
@@ -36,7 +50,7 @@ class Workflow:
             url = result.get("url", "")
             scraped = self.firecrawl.scrape_company_pages(url)
             if scraped:
-                all_content + scraped.markdown[:1500] + "\n\n"
+                all_content += scraped.markdown[:1500] + "\n\n"
 
         messages = [
             SystemMessage(content=self.prompts.TOOL_EXTRACTION_SYSTEM),
@@ -45,9 +59,10 @@ class Workflow:
 
         try:
             response = self.llm.invoke(messages)
+            response_text = self._response_text(response.content)
             tool_names = [
                 name.strip()
-                for name in response.content.strip().split("\n")
+                for name in response_text.strip().split("\n")
                 if name.strip()
             ]
             print(f"Extracted tools: {', '.join(tool_names[:5])}")
@@ -141,7 +156,7 @@ class Workflow:
         ]
 
         response = self.llm.invoke(messages)
-        return {"analysis": response.content}
+        return {"analysis": self._response_text(response.content)}
 
     def run(self, query: str) -> ResearchState:
         initial_state = ResearchState(query=query)

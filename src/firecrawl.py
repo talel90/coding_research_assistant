@@ -1,5 +1,7 @@
 import os
-from firecrawl import FirecrawlApp, ScrapeOptions
+from types import SimpleNamespace
+
+from firecrawl import FirecrawlApp
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -16,12 +18,12 @@ class FirecrawlService:
         try:
             result = self.app.search(
                 query=f"{query} company pricing",
-                limit=num_results,
-                scrape_options=ScrapeOptions(
-                    formats=["markdown"]
-                )
+                params={
+                    "limit": num_results,
+                    "scrapeOptions": {"formats": ["markdown"]},
+                },
             )
-            return result
+            return SimpleNamespace(data=result.get("data", []))
         except Exception as e:
             print(e)
             return []
@@ -30,9 +32,9 @@ class FirecrawlService:
         try:
             result = self.app.scrape_url(
                 url,
-                formats=["markdown"]
+                params={"formats": ["markdown"]},
             )
-            return result
+            return SimpleNamespace(markdown=result.get("markdown", ""))
         except Exception as e:
             print(e)
             return None
