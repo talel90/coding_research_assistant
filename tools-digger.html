@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tools Digger — dig up the right dev tool</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --soil-950:#170F0A;
+    --soil-900:#1E140D;
+    --soil-800:#33241A;
+    --clay:#8B5A3C;
+    --sandstone:#C9A66B;
+    --bedrock:#241811;
+    --gold:#E8B54D;
+    --gold-dim:#B08636;
+    --moss:#7A9471;
+    --parchment:#F3E9D2;
+    --parchment-dim:#E4D6B4;
+    --ink:#221812;
+    --danger:#C97361;
+    --radius:10px;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse at 20% -10%, #2A1C12 0%, transparent 55%),
+      linear-gradient(180deg, var(--soil-900) 0%, var(--soil-950) 100%);
+    color:var(--parchment);
+    font-family:'IBM Plex Sans', sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+
+  h1,h2,h3{font-family:'Fraunces', serif; margin:0; letter-spacing:-0.01em;}
+  .mono{font-family:'IBM Plex Mono', monospace;}
+
+  a{color:inherit;}
+
+  ::selection{background:var(--gold); color:var(--ink);}
+
+  :focus-visible{
+    outline:2px solid var(--gold);
+    outline-offset:3px;
+  }
+
+  .wrap{
+    max-width:960px;
+    margin:0 auto;
+    padding:0 24px;
+  }
+
+  /* ---------- HEADER ---------- */
+  header{
+    padding:28px 0 8px;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .brand svg{flex-shrink:0;}
+  .brand-name{
+    font-size:20px;
+    font-weight:600;
+  }
+  .brand-tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    color:var(--sandstone);
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    margin-top:2px;
+  }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    padding:56px 0 40px;
+    text-align:center;
+  }
+  .eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--moss);
+    background:rgba(122,148,113,0.12);
+    border:1px solid rgba(122,148,113,0.35);
+    padding:5px 12px;
+    border-radius:999px;
+    margin-bottom:22px;
+  }
+  .eyebrow .dot{
+    width:6px;height:6px;border-radius:50%;
+    background:var(--moss);
+    box-shadow:0 0 0 3px rgba(122,148,113,0.2);
+  }
+  .hero h1{
+    font-size:clamp(32px, 5.4vw, 56px);
+    font-weight:600;
+    line-height:1.08;
+    color:var(--parchment);
+  }
+  .hero h1 em{
+    font-style:italic;
+    color:var(--gold);
+  }
+  .hero p{
+    max-width:560px;
+    margin:18px auto 0;
+    color:var(--parchment-dim);
+    font-size:16px;
+    line-height:1.6;
+  }
+
+  /* ---------- SEARCH ---------- */
+  .digbar{
+    margin:34px auto 0;
+    max-width:640px;
+    display:flex;
+    gap:10px;
+    background:var(--soil-800);
+    border:1px solid rgba(201,166,107,0.28);
+    padding:8px;
+    border-radius:12px;
+    box-shadow:0 20px 40px -20px rgba(0,0,0,0.6);
+  }
+  .digbar input{
+    flex:1;
+    background:transparent;
+    border:none;
+    color:var(--parchment);
+    font-family:'IBM Plex Sans', sans-serif;
+    font-size:15px;
+    padding:12px 14px;
+  }
+  .digbar input::placeholder{color:#8A7A63;}
+  .digbar input:focus{outline:none;}
+  .dig-btn{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:var(--gold);
+    color:var(--ink);
+    border:none;
+    font-family:'IBM Plex Sans', sans-serif;
+    font-weight:600;
+    font-size:14px;
+    padding:0 20px;
+    border-radius:8px;
+    cursor:pointer;
+    transition:transform 0.15s ease, background 0.15s ease;
+  }
+  .dig-btn:hover{background:#F0C264;}
+  .dig-btn:active{transform:scale(0.97);}
+  .dig-btn:disabled{background:var(--gold-dim); cursor:progress; opacity:0.75;}
+  .dig-btn svg{width:16px;height:16px;}
+
+  .chips{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    justify-content:center;
+    margin:18px auto 0;
+    max-width:680px;
+  }
+  .chip{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--sandstone);
+    background:rgba(201,166,107,0.08);
+    border:1px solid rgba(201,166,107,0.25);
+    padding:6px 12px;
+    border-radius:999px;
+    cursor:pointer;
+    transition:background 0.15s ease, color 0.15s ease;
+  }
+  .chip:hover{background:rgba(201,166,107,0.18); color:var(--parchment);}
+
+  /* ---------- STRATA / DIG SECTION ---------- */
+  .digsite{
+    position:relative;
+    margin-top:52px;
+    border-radius:16px;
+    overflow:hidden;
+    border:1px solid rgba(201,166,107,0.2);
+    background:var(--bedrock);
+  }
+  .digsite svg{display:block; width:100%; height:auto;}
+
+  .drill{
+    position:absolute;
+    left:50%;
+    top:-40px;
+    transform:translateX(-50%);
+    transition:top 3.6s cubic-bezier(.55,0,.2,1);
+    filter:drop-shadow(0 6px 10px rgba(0,0,0,0.5));
+  }
+  .digsite.drilling .drill{ top:calc(100% - 46px); }
+
+  .depth-label{
+    position:absolute;
+    left:20px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--parchment-dim);
+    opacity:0.55;
+    transition:opacity 0.3s ease, color 0.3s ease;
+  }
+  .depth-label.active{opacity:1; color:var(--gold);}
+  .depth-label:nth-child(2){top:14%;}
+  .depth-label:nth-child(3){top:44%;}
+  .depth-label:nth-child(4){top:74%;}
+
+  .status-line{
+    text-align:center;
+    padding:14px 0 4px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    color:var(--sandstone);
+    min-height:20px;
+  }
+
+  /* ---------- RESULTS ---------- */
+  #results{
+    margin-top:44px;
+    display:none;
+  }
+  #results.show{display:block;}
+
+  .results-head{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    margin-bottom:16px;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .results-head h2{
+    font-size:20px;
+    color:var(--parchment);
+  }
+  .results-note{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    color:var(--moss);
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
+    gap:16px;
+  }
+
+  .artifact{
+    background:var(--parchment);
+    color:var(--ink);
+    border-radius:var(--radius);
+    padding:20px;
+    position:relative;
+    box-shadow:0 18px 30px -18px rgba(0,0,0,0.55);
+    opacity:0;
+    transform:translateY(14px);
+    animation:surface 0.5s ease forwards;
+  }
+  .artifact:nth-child(1){animation-delay:0.05s;}
+  .artifact:nth-child(2){animation-delay:0.18s;}
+  .artifact:nth-child(3){animation-delay:0.31s;}
+  .artifact:nth-child(4){animation-delay:0.44s;}
+  @keyframes surface{
+    to{opacity:1; transform:translateY(0);}
+  }
+
+  .artifact-index{
+    position:absolute;
+    top:-10px;
+    left:20px;
+    background:var(--gold);
+    color:var(--ink);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    font-weight:600;
+    padding:2px 8px;
+    border-radius:999px;
+  }
+  .artifact h3{
+    font-size:19px;
+    margin-top:6px;
+  }
+  .artifact a.site{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11.5px;
+    color:var(--clay);
+    text-decoration:none;
+    word-break:break-all;
+  }
+  .artifact a.site:hover{text-decoration:underline;}
+
+  .badges{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin:12px 0 14px;
+  }
+  .badge{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10.5px;
+    padding:3px 8px;
+    border-radius:6px;
+    font-weight:500;
+  }
+  .badge.good{background:rgba(122,148,113,0.18); color:#4B6146;}
+  .badge.bad{background:rgba(201,115,97,0.16); color:#9C4A38;}
+  .badge.neutral{background:rgba(139,90,60,0.14); color:#6E4327;}
+
+  .spec-row{
+    display:flex;
+    gap:8px;
+    font-size:13px;
+    padding:6px 0;
+    border-top:1px solid rgba(34,24,18,0.1);
+  }
+  .spec-row .k{
+    width:90px;
+    flex-shrink:0;
+    color:#6E5B45;
+    font-size:11.5px;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    padding-top:2px;
+  }
+  .spec-row .v{
+    flex:1;
+    line-height:1.45;
+  }
+  .tag{
+    display:inline-block;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    background:rgba(34,24,18,0.06);
+    padding:2px 7px;
+    border-radius:5px;
+    margin:2px 4px 2px 0;
+  }
+
+  /* ---------- FIELD NOTES ---------- */
+  .notes{
+    margin-top:22px;
+    background:var(--soil-800);
+    border:1px solid rgba(201,166,107,0.22);
+    border-radius:var(--radius);
+    padding:22px 24px;
+    opacity:0;
+    animation:surface 0.5s ease forwards;
+    animation-delay:0.55s;
+  }
+  .notes .label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    color:var(--gold);
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    margin-bottom:8px;
+  }
+  .notes p{
+    margin:0;
+    line-height:1.65;
+    color:var(--parchment-dim);
+    font-size:14.5px;
+  }
+
+  footer{
+    margin:70px 0 40px;
+    text-align:center;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11.5px;
+    color:#6E5B45;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .drill{transition:none;}
+    .artifact, .notes{animation:none; opacity:1; transform:none;}
+  }
+
+  @media (max-width:600px){
+    .depth-label{font-size:9.5px; left:12px;}
+    .digbar{flex-direction:column;}
+    .dig-btn{padding:12px; justify-content:center;}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
+        <circle cx="15" cy="15" r="14.5" stroke="#C9A66B" stroke-width="1"/>
+        <path d="M15 6 L15 20" stroke="#E8B54D" stroke-width="2" stroke-linecap="round"/>
+        <path d="M9 20 L21 20 L18 24 L12 24 Z" fill="#E8B54D"/>
+        <path d="M11 9 L19 9 L15 6 Z" fill="#C9A66B"/>
+      </svg>
+      <div>
+        <div class="brand-name">Tools Digger</div>
+        <div class="brand-tag">Dev tool research agent</div>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <span class="eyebrow"><span class="dot"></span>Extract → Research → Analyze</span>
+    <h1>Tell it what you're<br><em>building.</em> It digs up the tools.</h1>
+    <p>Describe the kind of tool you need in plain language. Tools Digger searches the web, reads through official pages, and hands you back a short, comparable brief on each option — no research spreadsheet required.</p>
+
+    <div class="digbar">
+      <input id="queryInput" type="text" placeholder="e.g. open source firebase alternatives" maxlength="140">
+      <button class="dig-btn" id="digBtn">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v13M12 16l-4-4M12 16l4-4M5 21h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span id="digBtnLabel">Dig</span>
+      </button>
+    </div>
+
+    <div class="chips">
+      <span class="chip" data-q="open source firebase alternatives">open source firebase alternatives</span>
+      <span class="chip" data-q="best python web frameworks for production REST APIs">python web frameworks for REST APIs</span>
+      <span class="chip" data-q="best tools for building saas applications">tools for building SaaS apps</span>
+      <span class="chip" data-q="django vs fastapi vs flask">django vs fastapi vs flask</span>
+    </div>
+  </section>
+
+  <div class="digsite" id="digsite">
+    <span class="depth-label" data-stage="0">01 · Extract candidate tools</span>
+    <span class="depth-label" data-stage="1">02 · Research each one</span>
+    <span class="depth-label" data-stage="2">03 · Analyze & compare</span>
+    <svg viewBox="0 0 1200 320" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="1200" height="320" fill="#241811"/>
+      <path d="M0,40 C 200,20 400,55 600,38 C 800,22 1000,50 1200,32 L1200,110 C1000,128 800,100 600,116 C400,132 200,105 0,120 Z" fill="#33241A"/>
+      <path d="M0,120 C200,105 400,132 600,116 C800,100 1000,128 1200,110 L1200,190 C1000,205 800,182 600,196 C400,210 200,190 0,205 Z" fill="#8B5A3C" fill-opacity="0.55"/>
+      <path d="M0,205 C200,190 400,210 600,196 C800,182 1000,205 1200,190 L1200,260 C1000,272 800,252 600,264 C400,276 200,258 0,270 Z" fill="#C9A66B" fill-opacity="0.35"/>
+      <g opacity="0.7">
+        <circle cx="180" cy="245" r="2.4" fill="#E8B54D"/>
+        <circle cx="430" cy="232" r="1.8" fill="#E8B54D"/>
+        <circle cx="710" cy="250" r="2.2" fill="#E8B54D"/>
+        <circle cx="960" cy="238" r="1.8" fill="#E8B54D"/>
+        <circle cx="1080" cy="255" r="2.4" fill="#E8B54D"/>
+      </g>
+    </svg>
+    <svg class="drill" width="28" height="52" viewBox="0 0 28 52" xmlns="http://www.w3.org/2000/svg">
+      <rect x="11" y="0" width="6" height="30" rx="2" fill="#C9A66B"/>
+      <path d="M14 30 L26 48 L2 48 Z" fill="#E8B54D"/>
+    </svg>
+  </div>
+
+  <div class="status-line" id="statusLine">Enter a query above, or tap an example, to start digging.</div>
+
+  <div id="results">
+    <div class="results-head">
+      <h2>What came up</h2>
+      <span class="results-note" id="resultsNote">demo data · not yet wired to a backend</span>
+    </div>
+    <div class="grid" id="grid"></div>
+    <div class="notes">
+      <div class="label">Field notes</div>
+      <p id="recommendation"></p>
+    </div>
+  </div>
+
+  <footer>Tools Digger — LangGraph · Firecrawl · Gemini. Static demo interface.</footer>
+</div>
+
+<script>
+(function(){
+  // Point this at your FastAPI server. If you serve the frontend from the
+  // same FastAPI app (see api.py), you can set this to an empty string ''.
+  const API_BASE = "http://localhost:8000";
+
+  const dataset = {
+    firebase: {
+      note: "demo data · matches README example output",
+      tools: [
+        { name:"Supabase", url:"https://supabase.com/", pricing:"Freemium", openSource:true, api:true,
+          stack:["Postgres","Elixir"], languages:["JS/TS","Python","Dart","Swift"], integrations:["Vercel","Next.js","Auth0"] },
+        { name:"Appwrite", url:"https://appwrite.io/", pricing:"Freemium", openSource:true, api:true,
+          stack:["PHP","Docker"], languages:["JS/TS","Python","Flutter","Swift"], integrations:["Docker Compose","Coolify"] },
+        { name:"PocketBase", url:"https://pocketbase.io/", pricing:"Free / self-hosted", openSource:true, api:true,
+          stack:["Go","SQLite"], languages:["JS/TS","Go","Dart"], integrations:["Fly.io","Railway"] }
+      ],
+      rec:"Supabase is the strongest pick if you want a Postgres core with row-level security and a large plugin ecosystem. Appwrite suits teams that prefer a fully self-hosted, container-based stack. PocketBase is the lightest option when a single-binary backend is enough."
+    },
+    python: {
+      note: "demo data · matches README example output",
+      tools: [
+        { name:"FastAPI", url:"https://fastapi.tiangolo.com/", pricing:"Free / open source", openSource:true, api:true,
+          stack:["Python","Starlette","Pydantic"], languages:["Python"], integrations:["Uvicorn","Docker","OpenAPI"] },
+        { name:"Django", url:"https://www.djangoproject.com/", pricing:"Free / open source", openSource:true, api:true,
+          stack:["Python","ORM","WSGI"], languages:["Python"], integrations:["PostgreSQL","Celery","DRF"] },
+        { name:"Flask", url:"https://flask.palletsprojects.com/", pricing:"Free / open source", openSource:true, api:true,
+          stack:["Python","Werkzeug","Jinja2"], languages:["Python"], integrations:["Gunicorn","SQLAlchemy"] }
+      ],
+      rec:"FastAPI is the go-to when async performance and typed request/response schemas matter most. Django fits larger applications that benefit from a batteries-included admin and ORM. Flask stays the right call for small services where minimal structure is a feature, not a gap."
+    },
+    saas: {
+      note: "demo data · generic starting set",
+      tools: [
+        { name:"Stripe", url:"https://stripe.com/", pricing:"Pay-as-you-go", openSource:false, api:true,
+          stack:["Hosted API"], languages:["JS/TS","Python","Ruby","Go"], integrations:["Billing","Webhooks","Tax"] },
+        { name:"Clerk", url:"https://clerk.com/", pricing:"Freemium", openSource:false, api:true,
+          stack:["Hosted API"], languages:["JS/TS","React","Next.js"], integrations:["Next.js","Remix"] },
+        { name:"Render", url:"https://render.com/", pricing:"Usage-based", openSource:false, api:true,
+          stack:["Managed infra"], languages:["Any (Docker)"], integrations:["GitHub","Postgres","Cron jobs"] }
+      ],
+      rec:"For a SaaS starting point: Stripe covers billing, Clerk covers auth without building it yourself, and Render removes most of the infrastructure decisions so the team can stay focused on the product itself."
+    },
+    default: {
+      note: "demo data · connect your backend for a live answer",
+      tools: [
+        { name:"Example Tool A", url:"https://example.com/tool-a", pricing:"Freemium", openSource:true, api:true,
+          stack:["Node.js","PostgreSQL"], languages:["JS/TS"], integrations:["GitHub Actions"] },
+        { name:"Example Tool B", url:"https://example.com/tool-b", pricing:"Paid", openSource:false, api:true,
+          stack:["Managed"], languages:["Any"], integrations:["Slack","Zapier"] }
+      ],
+      rec:"This is placeholder output. Once the interface is connected to the actual agent, this panel will show the real recommendation generated from your query."
+    }
+  };
+
+  function pickDataset(q){
+    const s = q.toLowerCase();
+    if (s.includes("firebase")) return dataset.firebase;
+    if (s.includes("python") || s.includes("django") || s.includes("fastapi") || s.includes("flask")) return dataset.python;
+    if (s.includes("saas")) return dataset.saas;
+    return dataset.default;
+  }
+
+  const input = document.getElementById('queryInput');
+  const btn = document.getElementById('digBtn');
+  const btnLabel = document.getElementById('digBtnLabel');
+  const digsite = document.getElementById('digsite');
+  const statusLine = document.getElementById('statusLine');
+  const results = document.getElementById('results');
+  const grid = document.getElementById('grid');
+  const recommendation = document.getElementById('recommendation');
+  const resultsNote = document.getElementById('resultsNote');
+  const labels = document.querySelectorAll('.depth-label');
+
+  document.querySelectorAll('.chip').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      input.value = chip.dataset.q;
+      runDig();
+    });
+  });
+
+  btn.addEventListener('click', runDig);
+  input.addEventListener('keydown', e=>{ if(e.key === 'Enter') runDig(); });
+
+  // Maps a /research API response into the same shape renderResults() expects.
+  function mapApiResponse(apiData){
+    return {
+      note: "live results from your backend",
+      tools: (apiData.tools || []).map(t => ({
+        name: t.name,
+        url: t.website || "#",
+        pricing: t.pricing || "Unknown",
+        openSource: !!t.open_source,
+        api: !!t.api_available,
+        stack: t.tech_stack || [],
+        languages: t.languages || [],
+        integrations: t.integrations || []
+      })),
+      rec: apiData.recommendation || ""
+    };
+  }
+
+  async function runDig(){
+    const q = input.value.trim();
+    if(!q){
+      statusLine.textContent = "Type a query first — e.g. \"self-hosted analytics tools\".";
+      return;
+    }
+    btn.disabled = true;
+    btnLabel.textContent = 'Digging…';
+    results.classList.remove('show');
+    digsite.classList.add('drilling');
+    labels.forEach(l => l.classList.remove('active'));
+
+    const stageMessages = [
+      "Searching the web and scraping candidate articles…",
+      "Reading through each tool's official page…",
+      "Comparing pricing, stack, and fit for your query…"
+    ];
+    let stage = 0;
+    statusLine.textContent = stageMessages[0];
+    labels.forEach(l => l.classList.toggle('active', Number(l.dataset.stage) === 0));
+    const cycle = setInterval(()=>{
+      stage = (stage + 1) % stageMessages.length;
+      statusLine.textContent = stageMessages[stage];
+      labels.forEach(l => l.classList.toggle('active', Number(l.dataset.stage) === stage));
+    }, 1400);
+
+    let data;
+    try{
+      const res = await fetch(API_BASE + "/research", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: q })
+      });
+      if(!res.ok) throw new Error("Backend returned " + res.status);
+      const apiData = await res.json();
+      data = mapApiResponse(apiData);
+    }catch(err){
+      // Backend not running / not reachable yet — fall back to demo data
+      // so the interface still demonstrates the flow.
+      data = pickDataset(q);
+      data.note = "backend unreachable — showing demo data (" + err.message + ")";
+    }
+
+    clearInterval(cycle);
+    renderResults(q, data);
+    digsite.classList.remove('drilling');
+    labels.forEach(l => l.classList.remove('active'));
+    statusLine.textContent = "Done — " + data.tools.length + " tools unearthed for \"" + q + "\".";
+    btn.disabled = false;
+    btnLabel.textContent = 'Dig';
+  }
+
+  function renderResults(q, data){
+    grid.innerHTML = '';
+    resultsNote.textContent = data.note;
+    data.tools.forEach((t, i)=>{
+      const card = document.createElement('div');
+      card.className = 'artifact';
+      card.innerHTML = `
+        <span class="artifact-index">${String(i+1).padStart(2,'0')}</span>
+        <h3>${t.name}</h3>
+        <a class="site" href="${t.url}" target="_blank" rel="noopener">${t.url.replace('https://','')}</a>
+        <div class="badges">
+          <span class="badge neutral">${t.pricing}</span>
+          <span class="badge ${t.openSource ? 'good' : 'bad'}">${t.openSource ? 'Open source' : 'Closed source'}</span>
+          <span class="badge ${t.api ? 'good' : 'bad'}">${t.api ? 'API available' : 'No public API'}</span>
+        </div>
+        <div class="spec-row"><div class="k">Stack</div><div class="v">${t.stack.map(x=>`<span class="tag">${x}</span>`).join('')}</div></div>
+        <div class="spec-row"><div class="k">Languages</div><div class="v">${t.languages.map(x=>`<span class="tag">${x}</span>`).join('')}</div></div>
+        <div class="spec-row"><div class="k">Integrations</div><div class="v">${t.integrations.map(x=>`<span class="tag">${x}</span>`).join('')}</div></div>
+      `;
+      grid.appendChild(card);
+    });
+    recommendation.textContent = data.rec;
+    results.classList.add('show');
+    results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+})();
+</script>
+
+</body>
+</html>
