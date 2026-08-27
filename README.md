@@ -10,13 +10,15 @@
 ![Pydantic](https://img.shields.io/badge/Pydantic-data%20validation-E92063?style=flat&logo=pydantic&logoColor=white)
 ![License](https://img.shields.io/badge/license-none%20yet-lightgrey?style=flat)
 
-A command-line, multi-step AI research agent that discovers developer tools, gathers information from the web, analyzes each tool, and generates a concise recommendation.
+A multi-step AI research agent with a FastAPI backend and web frontend. It discovers developer tools, gathers information from the web, analyzes each tool, and generates a concise recommendation. The original command-line interface is still available.
 
-The project is built with Python, LangChain, LangGraph, Google Gemini, Firecrawl, and Pydantic.
+The project is built with Python, FastAPI, LangChain, LangGraph, Google Gemini, Firecrawl, and Pydantic.
 
 ## Features
 
 - Accepts natural-language developer-tool queries from a terminal.
+- Provides a browser frontend served by FastAPI from `static/index.html`.
+- Exposes `/research` and `/health` API endpoints through FastAPI.
 - Searches the web for relevant articles and tool pages with Firecrawl.
 - Uses Gemini to extract candidate tools from scraped content.
 - Researches up to four tools in detail.
@@ -32,20 +34,22 @@ The project is built with Python, LangChain, LangGraph, Google Gemini, Firecrawl
 
 ## Architecture
 
-The application uses a sequential LangGraph workflow:
+The application has a FastAPI layer for the frontend and API, backed by a sequential LangGraph workflow:
 
 ```mermaid
 flowchart LR
-    A[User query] --> B[extract_tools]
-    B --> C[research]
-    C --> D[analyze]
-    D --> E[ResearchState result]
+   A[Browser frontend] --> B[FastAPI API]
+   B --> C[User query]
+   C --> D[extract_tools]
+   D --> E[research]
+   E --> F[analyze]
+   F --> G[ResearchState result]
 
-    B --> F[Firecrawl article search and scrape]
-    C --> G[Firecrawl official-site search and scrape]
-    B --> H[Gemini tool extraction]
-    C --> I[Gemini structured company analysis]
-    D --> J[Gemini recommendation]
+   D --> H[Firecrawl article search and scrape]
+   E --> I[Firecrawl official-site search and scrape]
+   D --> J[Gemini tool extraction]
+   E --> K[Gemini structured company analysis]
+   F --> L[Gemini recommendation]
 ```
 
 ### Workflow steps
@@ -74,11 +78,12 @@ flowchart LR
 coding_research_assistant/
 ├── .env                    # Local API keys; do not commit
 ├── .gitignore              # Ignored files and environment folders
+├── api.py                  # FastAPI API and frontend server
 ├── main.py                 # CLI entry point
 ├── requirements.txt        # Python dependencies
-├── cmdneeded.md             # Local setup notes
-├── autocomit.sh            # Optional automatic commit loop
 ├── README.md               # Project documentation
+├── static/
+│   └── index.html           # FastAPI-served web frontend
 └── src/
     ├── __init__.py         # Makes src a Python package
     ├── firecrawl.py        # Firecrawl client wrapper
@@ -132,6 +137,19 @@ FIRECRAWL_API_KEY=your_firecrawl_api_key
 Never commit `.env` or publish these keys. The application loads the file through `python-dotenv`.
 
 ## Running the Agent
+
+### Web frontend with FastAPI
+
+From the project root:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+uvicorn api:app --reload --port 8000
+```
+
+Open `http://localhost:8000` in a browser. The frontend uses the FastAPI `/research` endpoint, and API documentation is available at `http://localhost:8000/docs`.
+
+### Command-line interface
 
 From the project root:
 
@@ -198,6 +216,14 @@ prefer a container-based deployment...
 Actual output depends on search results, scrape availability, and model responses.
 
 ## Main Components
+
+### `api.py`
+
+Defines the FastAPI application, validates research requests, exposes the `/research` and `/health` endpoints, and serves the frontend from `static/index.html`.
+
+### `static/index.html`
+
+Provides the browser interface for submitting developer-tool research queries and displaying the returned tools and recommendation.
 
 ### `main.py`
 
