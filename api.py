@@ -102,5 +102,5 @@ def research(payload: QueryRequest):
 # Uncomment this once you drop tools-digger.html into a ./static folder.
 # This makes the whole thing ONE deployable service, no CORS needed at all.
 #
-# from fastapi.staticfiles import StaticFiles
-# app.mount("/", StaticFiles(directory="static", html=True), name="frontend")
+from fastapi.staticfiles import StaticFiles
+app.mount("/", StaticFiles(directory="static", html=True), name="frontend")
